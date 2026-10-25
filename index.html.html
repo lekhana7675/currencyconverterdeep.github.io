@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Currency converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#fff6f0;--surface:#fff;--ink:#2b1220;--ink-soft:#6b4a58;--line:#f0d3dc;--accent:#c2255c;--accent-ink:#fff;--chart:#c2255c;--chart2:#e8590c;--on-chart:#fff;--card:rgba(255,255,255,.74);--panel:linear-gradient(135deg,#d9480f,#c2255c 50%,#7b1fa2);--bg:radial-gradient(55rem 38rem at 5% -10%,#ffd9bf 0,transparent 60%),radial-gradient(50rem 38rem at 100% 5%,#ffc9e0 0,transparent 55%),radial-gradient(50rem 40rem at 50% 115%,#c9f2d9 0,transparent 60%),#fff6f0;--amber:#d99a12;--amber-light:#ffd97a;--positive:#17704a;--negative:#b3261e;--font-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;--font-body:'Instrument Sans','Segoe UI',system-ui,sans-serif;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#150a15;--surface:#231124;--ink:#fff0f5;--ink-soft:#d3adbf;--line:#4d2742;--accent:#ff8fab;--chart:#ff8fab;--chart2:#ffc857;--on-chart:#1a0b14;--card:rgba(35,17,36,.68);--panel:linear-gradient(135deg,#c2410c,#be185d 50%,#86198f);--bg:radial-gradient(55rem 38rem at 5% -10%,#6b1a35 0,transparent 60%),radial-gradient(50rem 38rem at 100% 5%,#5a1566 0,transparent 55%),radial-gradient(50rem 40rem at 50% 115%,#0f4a38 0,transparent 60%),#150a15;--positive:#86efac;--negative:#fda4af;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#150a15;--surface:#231124;--ink:#fff0f5;--ink-soft:#d3adbf;--line:#4d2742;--accent:#ff8fab;--chart:#ff8fab;--chart2:#ffc857;--on-chart:#1a0b14;--card:rgba(35,17,36,.68);--panel:linear-gradient(135deg,#c2410c,#be185d 50%,#86198f);--bg:radial-gradient(55rem 38rem at 5% -10%,#6b1a35 0,transparent 60%),radial-gradient(50rem 38rem at 100% 5%,#5a1566 0,transparent 55%),radial-gradient(50rem 40rem at 50% 115%,#0f4a38 0,transparent 60%),#150a15;--positive:#86efac;--negative:#fda4af;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);background-attachment:fixed;color:var(--ink);transition:color .4s;font:400 1rem/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--chart);outline-offset:2px}
+.page{display:grid;gap:2rem;max-width:1180px;margin:0 auto;padding:clamp(1rem,3vw,2rem)}
+h1{margin:0;width:fit-content;background:linear-gradient(90deg,var(--chart),var(--chart2));-webkit-background-clip:text;background-clip:text;color:transparent;font-family:var(--font-display);font-size:clamp(2rem,5vw,3.25rem);font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.intro{max-width:54ch;margin:.6rem 0 0;color:var(--ink-soft)}
+.layout{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(1.5rem,4vw,3rem);align-items:start}
+h2{margin:0;font-family:var(--font-display);font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+/* converter panel */
+.panel{display:grid;gap:1.75rem;padding:clamp(1.25rem,4vw,2.25rem);border-radius:22px;background:var(--panel);background-size:220% 220%;color:#fff;box-shadow:0 24px 50px -22px color-mix(in srgb,var(--chart) 80%,transparent);animation:rise .8s cubic-bezier(.2,.7,.2,1) both,shift 16s ease-in-out infinite}
+.panel :focus-visible{outline-color:var(--amber-light)}
+.form{display:grid;gap:.75rem}
+.field{display:grid;gap:.35rem}
+.label{font-size:.875rem;font-weight:500;opacity:.85}
+.input,.select{width:100%;padding:.7rem .9rem;border:1px solid color-mix(in srgb,currentColor 40%,transparent);border-radius:10px;background:color-mix(in srgb,currentColor 12%,transparent);color:inherit}
+.input{padding:.6rem .9rem;font-family:var(--font-display);font-size:1.75rem;font-weight:700;font-variant-numeric:tabular-nums}
+.input[aria-invalid="true"]{border-color:var(--amber-light)}
+.select{font-weight:500;cursor:pointer}
+.select option{color:#10231d;background:#fff}
+.hint{margin:0;font-size:.875rem;color:var(--amber-light)}
+.swap{display:flex;justify-content:center}
+.swap button{display:grid;place-items:center;width:2.75rem;height:2.75rem;border:0;border-radius:50%;background:#fff;color:#c2255c;cursor:pointer;box-shadow:0 8px 18px -8px #0007;transition:transform .45s cubic-bezier(.3,1.5,.5,1)}
+.swap button:hover{transform:rotate(180deg)}
+.result{display:grid;gap:.35rem}
+.result p{margin:0}
+.lead,.meta{opacity:.85}
+.meta{font-size:.9rem;font-variant-numeric:tabular-nums}
+.figure{font-family:var(--font-display);font-size:clamp(2.5rem,7vw,4.25rem);font-weight:700;line-height:1.05;letter-spacing:-.02em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.figure span{margin-left:.5rem;font-size:.4em;font-weight:500;letter-spacing:0}
+.name{font-weight:500}
+/* history */
+.history{display:grid;gap:1.5rem;min-width:0}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem}
+.pair{margin:.15rem 0 0;color:var(--ink-soft)}
+.tabs{display:inline-flex;gap:.2rem;padding:.25rem;border:1px solid var(--line);border-radius:999px;background:var(--card);backdrop-filter:blur(10px)}
+.tabs button{min-width:2.6rem;padding:.4rem .75rem;border:0;border-radius:999px;background:transparent;color:var(--ink-soft);font-weight:600;cursor:pointer;transition:background .3s,color .3s,box-shadow .3s}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-pressed="true"]{background:linear-gradient(135deg,var(--chart),var(--chart2));color:var(--on-chart);box-shadow:0 6px 16px -6px var(--chart)}
+.chart{position:relative;width:100%;height:280px;border-radius:18px;border:1px solid var(--line);background:var(--card);backdrop-filter:blur(10px);overflow:hidden}
+.chart svg{display:block;touch-action:pan-y}
+.grid{stroke:var(--line)}
+.tick{font:500 11.5px var(--font-body);fill:var(--ink-soft);font-variant-numeric:tabular-nums}
+.area{fill:url(#ga)}
+.line{fill:none;stroke:url(#gl);stroke-width:2.75;stroke-linejoin:round;stroke-linecap:round}.line.draw{stroke-dasharray:1;animation:draw 1.2s ease-out both}.area.draw{animation:fade 1.4s ease-out both}
+.extreme{fill:var(--amber);stroke:var(--ink);stroke-width:1.5}
+.cursor{stroke:var(--ink);stroke-dasharray:3 3}
+.dot{fill:var(--chart);stroke:var(--surface);stroke-width:2}
+.tipbox{fill:#2b1220}
+.tipdate{font:500 11.5px var(--font-body);fill:#f6d2df}
+.tipval{font:700 14px var(--font-display);fill:#fff;font-variant-numeric:tabular-nums}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:18px;background:var(--card);backdrop-filter:blur(10px)}
+.stats div{padding:0 1rem;border-left:1px solid var(--line)}
+.stats div:first-child{padding-left:0;border-left:0}
+.stats dt{font-size:.875rem;color:var(--ink-soft)}
+.stats dd{margin:0}
+.stats .v{font-family:var(--font-display);font-size:1.4rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.stats .n{font-size:.85rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.up{color:var(--positive)}.down{color:var(--negative)}
+.note{margin:0;max-width:60ch;font-size:.875rem;color:var(--ink-soft)}
+footer{padding-top:1rem;border-top:1px solid var(--line);font-size:.875rem;color:var(--ink-soft)}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:620px){.stats{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:1rem}.stats div:nth-child(odd){padding-left:0;border-left:0}}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
+.history{animation:rise .8s .14s cubic-bezier(.2,.7,.2,1) both}
+.theme{flex:none;display:grid;place-items:center;width:2.9rem;height:2.9rem;border:1px solid var(--line);border-radius:50%;background:var(--card);backdrop-filter:blur(10px);color:var(--ink);cursor:pointer;transition:transform .5s cubic-bezier(.3,1.5,.5,1),background .3s}
+.theme:hover{transform:rotate(30deg) scale(1.08)}
+.theme svg{animation:spin .6s cubic-bezier(.3,1.4,.5,1)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+@keyframes shift{50%{background-position:100% 100%}}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes fade{from{opacity:0}}
+@keyframes spin{from{transform:rotate(-90deg) scale(.5);opacity:0}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="top"><div>
+    <h1>Currency converter</h1>
+    <p class="intro">Convert between currencies and see how the rate has moved. This preview uses sample rates; the project version loads live ones.</p></div>
+    <button type="button" class="theme" id="theme"></button>
+  </header>
+  <div class="layout">
+    <section class="panel" aria-labelledby="h-convert">
+      <h2 id="h-convert">Convert</h2>
+      <div class="form">
+        <div class="field"><label class="label" for="amount">Amount</label>
+          <input class="input" id="amount" value="100" inputmode="decimal" autocomplete="off">
+          <p class="hint" id="hint" hidden>Enter a number, like 250 or 99.50.</p></div>
+        <div class="field"><label class="label" for="from">From</label><select class="select" id="from"></select></div>
+        <div class="swap"><button type="button" id="swap" aria-label="Swap currencies"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M8 4v14m0 0-3.5-3.5M8 18l3.5-3.5M16 20V6m0 0-3.5 3.5M16 6l3.5 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="field"><label class="label" for="to">To</label><select class="select" id="to"></select></div>
+      </div>
+      <div class="result" id="result" aria-live="polite"></div>
+    </section>
+    <section class="history" aria-labelledby="h-hist">
+      <div class="head">
+        <div><h2 id="h-hist">Rate history</h2><p class="pair" id="pair"></p></div>
+        <div class="tabs" id="tabs" role="group" aria-label="History range"></div>
+      </div>
+      <div class="chart" id="chart" tabindex="0" role="group" aria-label="Rate chart. Use the left and right arrow keys to read individual values."></div>
+      <p class="sr" id="live" aria-live="polite"></p>
+      <dl class="stats" id="stats"></dl>
+      <p class="note" id="note" hidden>Longer ranges use weekly data points instead of daily ones, so the highest and lowest values come from that sample.</p>
+    </section>
+  </div>
+  <footer>Sample rates for preview only. They are not a quote for trading or transfers.</footer>
+</main>
+<script>
+const BASE={USD:1,EUR:.9241,GBP:.7893,INR:84.1,JPY:151.2,AUD:1.52,CAD:1.37,CHF:.881,CNY:7.24,SGD:1.34,AED:3.6725,BRL:5.02};
+const NAMES={USD:'United States Dollar',EUR:'Euro',GBP:'British Pound',INR:'Indian Rupee',JPY:'Japanese Yen',AUD:'Australian Dollar',CAD:'Canadian Dollar',CHF:'Swiss Franc',CNY:'Chinese Renminbi Yuan',SGD:'Singapore Dollar',AED:'UAE Dirham',BRL:'Brazilian Real'};
+const RANGES=[['1M','1 month',30],['3M','3 months',90],['6M','6 months',182],['1Y','1 year',365],['5Y','5 years',1825]];
+const N=1825, $=id=>document.getElementById(id);
+const st={amount:'100',from:'USD',to:'EUR',range:'3M'};
+try{Object.assign(st,JSON.parse(localStorage.getItem('fx-demo')||'{}'))}catch{}
+if(!BASE[st.from]||!BASE[st.to]||!RANGES.some(r=>r[0]===st.range))Object.assign(st,{from:'USD',to:'EUR',range:'3M'});
+// deterministic sample history: one random walk per currency, normalised so today's value is 1
+const F={};
+for(const c in BASE){let s=[...c].reduce((a,ch)=>a*31+ch.charCodeAt(0)>>>0,7),f=[1];
+  const rnd=()=>{s=s+0x6D2B79F5>>>0;let t=Math.imul(s^s>>>15,1|s);t^=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  for(let i=1;i<=N;i++)f.push(f[i-1]*(1+(rnd()-.5)*(c==='USD'?0:.012)));
+  F[c]=f.map(v=>v/f[N])}
+const rateAt=(a,b,i)=>BASE[b]*F[b][i]/(BASE[a]*F[a][i]);
+const nf=(o)=>new Intl.NumberFormat(undefined,o);
+const amt=v=>nf({minimumFractionDigits:2,maximumFractionDigits:v!==0&&Math.abs(v)<1?4:2}).format(v);
+const rt=v=>nf({maximumSignificantDigits:6}).format(v);
+const today=new Date();
+const dayStr=off=>{const d=new Date(today);d.setUTCDate(d.getUTCDate()-off);return d.toISOString().slice(0,10)};
+const fd=(iso,o={day:'numeric',month:'short',year:'numeric'})=>new Intl.DateTimeFormat(undefined,{...o,timeZone:'UTC'}).format(new Date(iso+'T00:00:00Z'));
+const parse=s=>{s=s.trim().replace(/,/g,'');return s===''||s==='.'||!/^\d*\.?\d*$/.test(s)?null:Number(s)};
+const save=()=>{try{localStorage.setItem('fx-demo',JSON.stringify(st))}catch{}};
+
+function history(){const days=RANGES.find(r=>r[0]===st.range)[2],step=days>90?7:1,pts=[];
+  for(let off=Math.floor(days/step)*step;off>=0;off-=step)pts.push({date:dayStr(off),value:rateAt(st.from,st.to,N-off)});
+  return pts}
+
+function renderResult(){const a=parse(st.amount),bad=st.amount.trim()!==''&&a===null;
+  $('amount').setAttribute('aria-invalid',bad);$('hint').hidden=!bad;
+  const r=$('result');
+  if(a===null){r.innerHTML='<p class="lead">Enter an amount to see the converted value.</p>';return}
+  const rate=rateAt(st.from,st.to,N);
+  r.innerHTML=`<p class="lead">${amt(a)} ${st.from} equals</p><p class="figure">${amt(a*rate)}<span>${st.to}</span></p>`+
+   (st.to!==NAMES[st.to]?`<p class="name">${NAMES[st.to]}</p>`:'')+`<p class="meta">1 ${st.from} = ${rt(rate)} ${st.to}</p><p class="meta">Rate published ${fd(dayStr(0))}</p>`;countUp(a*rate)}
+
+let pts=[],geo=null,active=null;
+function renderHistory(){
+  const rg=RANGES.find(r=>r[0]===st.range);
+  $('pair').textContent=`1 ${st.from} in ${st.to}, past ${rg[1]}`;
+  $('tabs').innerHTML=RANGES.map(r=>`<button type="button" aria-pressed="${r[0]===st.range}" aria-label="${r[1]}" data-r="${r[0]}">${r[0]}</button>`).join('');
+  $('note').hidden=rg[2]<=90;
+  pts=history();active=null;drawChart(true);
+  let hi=pts[0],lo=pts[0],sum=0;for(const p of pts){if(p.value>hi.value)hi=p;if(p.value<lo.value)lo=p;sum+=p.value}
+  const ch=pts[pts.length-1].value-pts[0].value,pc=ch/pts[0].value*100,cls=ch>0?'up':ch<0?'down':'';
+  const sg=(v,o)=>nf({...o,signDisplay:'exceptZero'}).format(v);
+  $('stats').innerHTML=`<div><dt>Change</dt><dd class="v ${cls}">${sg(pc/100,{style:'percent',maximumFractionDigits:2})}</dd><dd class="n">${sg(ch,{maximumSignificantDigits:4})} ${st.to}</dd></div>
+   <div><dt>Highest</dt><dd class="v">${rt(hi.value)}</dd><dd class="n">${fd(hi.date)}</dd></div>
+   <div><dt>Lowest</dt><dd class="v">${rt(lo.value)}</dd><dd class="n">${fd(lo.date)}</dd></div>
+   <div><dt>Average</dt><dd class="v">${rt(sum/pts.length)}</dd><dd class="n">${pts.length} data points</dd></div>`}
+
+function drawChart(fresh){
+  const el=$('chart'),W=el.clientWidth;if(!W)return;
+  const H=280,P={t:16,r:16,b:30,l:60},iw=Math.max(W-P.l-P.r,1),ih=H-P.t-P.b;
+  const vs=pts.map(p=>p.value),t=pts.map(p=>Date.parse(p.date));
+  let lo=Math.min(...vs),hi=Math.max(...vs);const m=hi===lo?Math.abs(hi)*.01||1:(hi-lo)*.12;lo-=m;hi+=m;
+  const t0=t[0],span=t[t.length-1]-t0||1;
+  const xs=t.map(v=>P.l+(v-t0)/span*iw),ys=vs.map(v=>P.t+(1-(v-lo)/(hi-lo))*ih),by=P.t+ih;
+  const line=xs.map((x,i)=>`${i?'L':'M'}${x.toFixed(1)} ${ys[i].toFixed(1)}`).join(' ');
+  const area=`${line} L${xs.at(-1).toFixed(1)} ${by} L${xs[0].toFixed(1)} ${by} Z`;
+  const long=span/864e5>180,fmt=long?{month:'short',year:'numeric'}:{day:'numeric',month:'short'};
+  let ex=[0,0];vs.forEach((v,i)=>{if(v>vs[ex[0]])ex[0]=i;if(v<vs[ex[1]])ex[1]=i});
+  const ticks=[0,1,2,3].map(k=>{const y=P.t+(1-k/3)*ih;return`<line class="grid" x1="${P.l}" x2="${W-P.r}" y1="${y}" y2="${y}"/><text class="tick" x="${P.l-8}" y="${y+4}" text-anchor="end">${rt(lo+(hi-lo)*k/3)}</text>`}).join('');
+  const xt=[0,Math.floor((pts.length-1)/2),pts.length-1].map((i,k)=>`<text class="tick" x="${xs[i]}" y="${H-8}" text-anchor="${k===0?'start':k===2?'end':'middle'}">${fd(pts[i].date,fmt)}</text>`).join('');
+  el.innerHTML=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><defs><linearGradient id="gl" x1="0" x2="1"><stop offset="0" style="stop-color:var(--chart)"/><stop offset="1" style="stop-color:var(--chart2)"/></linearGradient><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" style="stop-color:var(--chart);stop-opacity:.38"/><stop offset="1" style="stop-color:var(--chart2);stop-opacity:0"/></linearGradient></defs>${ticks}${xt}<path class="area${fresh?' draw':''}" d="${area}"/><path class="line${fresh?' draw':''}" pathLength="1" d="${line}"/>${ex.map(i=>`<circle class="extreme" cx="${xs[i]}" cy="${ys[i]}" r="4.5"/>`).join('')}<g id="tip"></g></svg>`;
+  geo={xs,ys,W,by,top:P.t};
+  const svg=el.firstChild;
+  svg.addEventListener('pointermove',e=>{const x=e.clientX-svg.getBoundingClientRect().left;let b=0,d=1e9;xs.forEach((px,i)=>{if(Math.abs(px-x)<d){d=Math.abs(px-x);b=i}});show(b)});
+  svg.addEventListener('pointerleave',()=>show(null));
+}
+function show(i){
+  active=i;const tip=$('tip');if(!tip||!geo)return;
+  if(i===null){tip.innerHTML='';$('live').textContent='';return}
+  const p=pts[i],x=geo.xs[i],y=geo.ys[i],bx=x+12+128>geo.W-4?x-12-128:x+12;
+  tip.innerHTML=`<line class="cursor" x1="${x}" x2="${x}" y1="${geo.top}" y2="${geo.by}"/><circle class="dot" cx="${x}" cy="${y}" r="5"/><g transform="translate(${bx} ${geo.top+4})"><rect class="tipbox" width="128" height="46" rx="6"/><text class="tipdate" x="10" y="19">${fd(p.date)}</text><text class="tipval" x="10" y="37">${rt(p.value)} ${st.to}</text></g>`;
+  $('live').textContent=`${fd(p.date)}: ${rt(p.value)} ${st.to}`}
+
+let prevRes=null,raf=0;
+function countUp(to){const n=$('result').querySelector('.figure')?.firstChild;if(!n)return;cancelAnimationFrame(raf);
+  const from=prevRes??to;prevRes=to;
+  if(from===to||matchMedia('(prefers-reduced-motion: reduce)').matches){n.nodeValue=amt(to);return}
+  const t0=performance.now();(function step(t){const k=Math.min((t-t0)/450,1),e=1-Math.pow(1-k,3);n.nodeValue=amt(from+(to-from)*e);if(k<1)raf=requestAnimationFrame(step)})(t0)}
+// theme: follows the system until the toggle is used, then remembers the choice
+const root=document.documentElement,mq=matchMedia('(prefers-color-scheme: dark)');
+try{const t=localStorage.getItem('fx-theme');if(t)root.dataset.theme=t}catch{}
+const ico=p=>`<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const SUN=ico('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>');
+const MOON=ico('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>');
+const isDark=()=>root.dataset.theme?root.dataset.theme==='dark':mq.matches;
+function paintTheme(){const d=isDark();$('theme').innerHTML=d?SUN:MOON;$('theme').setAttribute('aria-label',d?'Switch to light mode':'Switch to dark mode')}
+$('theme').addEventListener('click',()=>{root.dataset.theme=isDark()?'light':'dark';try{localStorage.setItem('fx-theme',root.dataset.theme)}catch{}paintTheme()});
+mq.addEventListener('change',paintTheme);paintTheme();
+// wiring
+const opts=Object.keys(BASE).sort((a,b)=>NAMES[a].localeCompare(NAMES[b])).map(c=>`<option value="${c}">${NAMES[c]} (${c})</option>`).join('');
+$('from').innerHTML=opts;$('to').innerHTML=opts;
+function sync(){$('from').value=st.from;$('to').value=st.to;$('amount').value=st.amount;save();renderResult();renderHistory()}
+$('amount').addEventListener('input',e=>{st.amount=e.target.value;save();renderResult()});
+$('from').addEventListener('change',e=>{const v=e.target.value;if(v===st.to)st.to=st.from;st.from=v;sync()});
+$('to').addEventListener('change',e=>{const v=e.target.value;if(v===st.from)st.from=st.to;st.to=v;sync()});
+$('swap').addEventListener('click',()=>{[st.from,st.to]=[st.to,st.from];sync()});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){st.range=b.dataset.r;save();renderHistory()}});
+$('chart').addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const s=e.key==='ArrowLeft'?-1:1;show(Math.min(pts.length-1,Math.max(0,(active??pts.length-1)+s)))}else if(e.key==='Escape')show(null)});
+$('chart').addEventListener('blur',()=>show(null));
+new ResizeObserver(()=>drawChart()).observe($('chart'));
+sync();
+</script>
+</body>
+</html>
